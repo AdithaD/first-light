@@ -72,12 +72,14 @@ sessions          (id (hashed token), user_id→users, expires_at)  -- ADR-0005
 - Password hash format: `pbkdf2$sha256$<iterations>$<salt-base64url>$<hash-base64url>`;
   WebCrypto PBKDF2-SHA256, random 16-byte salt, 256-bit derived value,
   constant-time comparison. No password or raw session token is stored.
-- `AUTH_PBKDF2_ITERATIONS` currently defaults to **100,000 provisionally**.
-  Cloudflare documents PBKDF2 support but does not state whether its async
-  `deriveBits()` work is excluded from Worker CPU accounting. Local Node time
-  is not evidence of deployed Worker CPU usage. **Before enabling production
-  signup, measure this on a deployed Worker and record the CPU result/plan
-  limit; adjust the work factor if necessary.**
+- `AUTH_PBKDF2_ITERATIONS` defaults to **100,000** (owner-approved MVP
+  setting, 2026-09-24). A temporary isolated Worker with the account's default
+  CPU limit completed 100,000 iterations in six trials. 150,000 returned
+  Cloudflare error 1101 twice; this status alone does not prove CPU exhaustion,
+  and no exact per-request CPU-ms measurement was obtained. Lower tested values
+  (10k–75k) also succeeded. This is an empirical compatibility check, not a
+  security-strength certification. Owner accepts 100k for MVP and will consider
+  Workers Paid if stronger password-hash work factor is needed.
 - Sessions use 32 random bytes in a base64url cookie; D1 stores only the
   SHA-256 token digest. Cookie flags: `HttpOnly; SameSite=Lax; Secure` in
   production, path `/`, 30-day max-age; the database TTL and cookie TTL match.
@@ -88,15 +90,15 @@ sessions          (id (hashed token), user_id→users, expires_at)  -- ADR-0005
 
 ## Configuration / env vars
 
-| Var                                         | Scope  | Purpose                                                                                  |
-| ------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `AI_ACCOUNT_ID`, `AI_API_TOKEN`             | secret | Workers AI REST endpoint auth                                                            |
-| `AI_MODEL`                                  | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`)                                              |
-| `RESEND_API_KEY`                            | secret | Email sending                                                                            |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | OAuth                                                                                    |
-| `GUARDIAN_API_KEY`                          | secret | News source                                                                              |
-| `APP_ORIGIN`                                | config | Base URL (OAuth redirects, email links)                                                  |
-| `AUTH_PBKDF2_ITERATIONS`                    | config | Provisional password-hash work factor; must be measured on Workers before production use |
+| Var                                         | Scope  | Purpose                                                                                                    |
+| ------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| `AI_ACCOUNT_ID`, `AI_API_TOKEN`             | secret | Workers AI REST endpoint auth                                                                              |
+| `AI_MODEL`                                  | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`)                                                                |
+| `RESEND_API_KEY`                            | secret | Email sending                                                                                              |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | OAuth                                                                                                      |
+| `GUARDIAN_API_KEY`                          | secret | News source                                                                                                |
+| `APP_ORIGIN`                                | config | Base URL (OAuth redirects, email links)                                                                    |
+| `AUTH_PBKDF2_ITERATIONS`                    | config | Password-hash work factor (default 100,000; owner-approved MVP value; revisit with Workers Paid if needed) |
 
 Secrets are set via `wrangler secret put` (prod) and `.env` (local dev);
 `.env.example` documents all of them. Never commit real values.

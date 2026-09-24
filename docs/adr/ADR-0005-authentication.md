@@ -34,6 +34,16 @@ OAuth desirable.
 - **Better Auth** — feature-rich but heavier; D1 support maturing.
 - **Supabase Auth** — vendor-coupled; DB already declined (ADR-0002).
 
+## Runtime work-factor follow-up (owner confirmed 2026-09-24)
+
+- MVP PBKDF2-SHA256 work factor: **100,000 iterations**.
+- Temporary isolated deployed Worker: 100k completed in six trials; 150k
+  returned Cloudflare error 1101 twice. The exact cause/CPU-ms was not exposed,
+  so this is an empirical compatibility result, not a claim of measured CPU
+  time or a password-security certification.
+- Owner accepts 100k for MVP; revisit stronger work factors if Workers Paid is
+  adopted or the threat model requires it.
+
 ## Consequences / triggers to revisit
 
 - **Trigger:** adding a _second_ OAuth provider → formally re-evaluate

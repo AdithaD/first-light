@@ -35,8 +35,8 @@ curated) will be deliberately designed **before Phase 3** — auth ships first.
 - [ ] Migration workflow verified local & remote (`wrangler d1 migrations apply`)
 - [x] Repository layer over D1 (`UserRepository`/`SessionRepository`), unit-tested against real SQLite + actual migration
 - [x] Auth: email+password (WebCrypto PBKDF2), session cookies, signup/login/logout, protected routes; local Wrangler D1-emulator route walkthrough passed
-  - ⚠️ Work factor 100,000 is provisional; measure deployed Worker CPU before production signup is enabled (see ARCHITECTURE.md)
-- [ ] Auth migration applied remotely after CPU work-factor verification (do not expose production signup before then)
+  - [x] PBKDF2 work factor set to 100,000 for MVP by owner approval; isolated deployed Worker completed six 100k trials. Higher trial produced Cloudflare 1101 twice; cause not proven. See ARCHITECTURE.md and ADR-0005.
+- [ ] Auth migration applied remotely when production rollout is otherwise approved (Google OAuth remains incomplete; do not expose signup until phase verification).
 - [ ] Auth: Google OAuth (authorization-code flow, verified-email auto-linking) — 🔑 owner creates Google Cloud OAuth client
 - [ ] Phase verification: full walkthrough both paths, CI green, deploy
 

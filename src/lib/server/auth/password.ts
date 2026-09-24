@@ -4,8 +4,9 @@
  *   pbkdf2$sha256$<iterations>$<salt-b64url>$<hash-b64url>
  * Iterations are configurable (AUTH_PBKDF2_ITERATIONS) because hashing runs
  * inside the Worker and counts against the CPU budget (ADR-0001). Default
- * 100k is a deliberate trade-off documented in ARCHITECTURE.md — revisit on
- * Workers Paid or if threat model changes.
+ * 100k is the owner-approved MVP work factor (tested on a temporary deployed
+ * Worker; see ARCHITECTURE.md). Revisit if the threat model changes or Workers
+ * Paid is adopted.
  */
 const DEFAULT_ITERATIONS = 100_000;
 const SALT_BYTES = 16;
