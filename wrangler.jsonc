@@ -13,8 +13,11 @@
     {
       "binding": "DB",
       "database_name": "first-light",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "28fb4299-4d0b-414f-a048-59a40919fb56",
     },
   ],
+  "vars": {
+    "APP_VERSION": "0.1.0",
+  },
   // Cron Trigger added in Phase 5 with the brief engine (ROADMAP.md).
 }
