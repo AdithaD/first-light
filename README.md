@@ -1,5 +1,7 @@
 # First Light
 
+[![CI](https://github.com/AdithaD/first-light/actions/workflows/ci.yml/badge.svg)](https://github.com/AdithaD/first-light/actions/workflows/ci.yml)
+
 A daily personal briefing app: local weather, curated news, and an AI-written
 summary — delivered in-app and by email — customised per user by **locality**
 and **interests**. English-language product; **initial market scope is
