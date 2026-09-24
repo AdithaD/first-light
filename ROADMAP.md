@@ -15,10 +15,11 @@ Status at each gate is recorded inline. Decisions reference
 
 ## Phase 1 — Skeleton app
 
-- 📦 Scaffold SvelteKit (Svelte 5, TypeScript strict) via `npx sv create` → **authorise toolchain deps in DEPENDENCIES.md**
-- `adapter-cloudflare`, `wrangler` dev config (Workers + local D1, `wrangler dev`)
-- Tooling: ESLint + Prettier, Vitest, Playwright (installed, thin config)
-- Home page + layout, `/health` endpoint, `.env.example`, Node 24 LTS pin (`.nvmrc`/`engines`)
+- [x] 📦 Scaffold SvelteKit (Svelte 5, TypeScript strict) via `sv create` → toolchain deps authorised in DEPENDENCIES.md (incl. Tailwind v4 — owner choice)
+- [x] `adapter-cloudflare` + `wrangler.jsonc` (Workers + D1 binding stub, cron deferred to Phase 5), verified via `wrangler dev` smoke test
+- [ ] `.nvmrc` pin committed — Node version decision pending (24 LTS vs 26-until-LTS)
+- Tooling: ESLint/Prettier/Vitest configs (Step 4 — ESLint needs `typescript-eslint` authorisation)
+- Home page + layout (done, placeholder), `/health` endpoint, `.env.example` done, Node version pin
 - CI: lint + typecheck + unit tests on push
 - **Gate:** first deployment of the empty pipeline to Workers (proves hosting, DNS, CI end-to-end)
 

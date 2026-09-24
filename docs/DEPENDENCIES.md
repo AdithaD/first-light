@@ -7,15 +7,22 @@ owner's explicit authorisation, recorded here first.** Status values:
 Runtime dependency policy: integrations use plain `fetch` / WebCrypto; the
 dependency surface is intentionally near-zero (ADR-0003/0004/0005).
 
-## Framework / toolchain (authorise at Phase 1 scaffold)
+## Framework / toolchain — AUTHORISED (Phase 1, Step 1 — owner tick 2026-09-24)
 
-| Package | Purpose | Status | Authorised | Notes |
-|---|---|---|---|---|
-| `svelte`, `@sveltejs/kit`, `vite` | App framework + build | authorised | (this session) | Svelte 5, TS strict |
-| `@sveltejs/adapter-cloudflare` | Workers deployment | authorised | (this session) | Charter-compliant |
-| `wrangler` (dev) | Local Workers/D1 runtime, deploy | authorised | (this session) | |
-| `eslint`, `prettier`, `vitest`, `@playwright/test` | Quality tooling | authorised | (this session) | Dev-only |
-| TypeScript + Svelte language tools | Type checking | authorised | (this session) | Dev-only |
+| Package | Purpose | Status | Notes |
+|---|---|---|---|
+| `svelte`, `@sveltejs/kit`, `@sveltejs/vite-plugin-svelte`, `vite` | App framework + build | authorised | Svelte 5, TS strict |
+| `typescript`, `svelte-check` | Type checking | authorised | dev-only |
+| `@sveltejs/adapter-cloudflare` | Workers deployment | authorised | ADR-0001 |
+| `wrangler` | Local Workers/D1 runtime + deploy | authorised | dev-only |
+| `eslint`, `eslint-plugin-svelte` | Linting | authorised | dev-only |
+| `prettier`, `prettier-plugin-svelte` | Formatting | authorised | dev-only |
+| `vitest` | Unit testing | authorised | dev-only |
+| `tailwindcss`, `@tailwindcss/vite` | Styling (Tailwind v4, Vite plugin — no config file needed) | authorised | owner chose Tailwind over plain CSS |
+
+Runtime dependency policy unchanged: integrations use plain `fetch` / WebCrypto;
+the runtime (`dependencies`) surface remains **zero**. All packages above are
+`devDependencies` from the app's perspective.
 
 ## Runtime integrations — **zero npm dependencies by design**
 

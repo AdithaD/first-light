@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+
+/* Global baseline on top of Tailwind's preflight */
+body {
+	@apply bg-slate-950 text-slate-100 antialiased;
+}
