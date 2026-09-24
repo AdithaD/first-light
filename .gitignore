@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+build/
+.svelte-kit/
+.wrangler/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Test artefacts
+coverage/
+playwright-report/
+test-results/
+
+# Logs & OS noise
+*.log
+.DS_Store
