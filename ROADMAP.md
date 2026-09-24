@@ -22,9 +22,9 @@ Status at each gate is recorded inline. Decisions reference
 - [x] Home page + layout, `/health` endpoint (verified via wrangler dev), `.env.example`
 - [x] CI: lint + typecheck + unit tests + build on push — **first run green** (repo: github.com/AdithaD/first-light; deploy stays manual until Phase 7)
 - [x] **Gate met:** first deployment of the empty pipeline to Workers — live at
-  `https://first-light.adithaidoratiyawa.workers.dev`, `/health` returning
-  `{"status":"ok","version":"0.1.0",...}` (2026-09-24); D1 `first-light` created
-  and bound (`DB`); DNS/TLS via workers.dev; CI green; hosting proven end-to-end
+      `https://first-light.adithaidoratiyawa.workers.dev`, `/health` returning
+      `{"status":"ok","version":"0.1.0",...}` (2026-09-24); D1 `first-light` created
+      and bound (`DB`); DNS/TLS via workers.dev; CI green; hosting proven end-to-end
 
 ## Phase 2 — Users & auth (preferences deferred)
 
