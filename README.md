@@ -24,17 +24,17 @@ expand later).
 
 ## Locked architecture (decided — see ADRs)
 
-| Concern  | Decision                                                                           | ADR                                                 |
-| -------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Hosting  | Cloudflare Workers + D1 + Cron Triggers, under a **portability charter**           | [ADR-0001](docs/adr/ADR-0001-cloudflare-hosting.md) |
-| Database | Cloudflare D1 (SQLite), repository layer, SQL migrations in git                    | [ADR-0002](docs/adr/ADR-0002-d1-database.md)        |
-| AI       | `Summariser` interface → Workers AI via OpenAI-compatible HTTP endpoint            | [ADR-0003](docs/adr/ADR-0003-ai-provider.md)        |
-| Email    | Resend behind a `Mailer` interface (plain `fetch`)                                 | [ADR-0004](docs/adr/ADR-0004-email-delivery.md)     |
-| Auth     | Lucia-style sessions on D1; email+password **and** Google OAuth, equal coexistence | [ADR-0005](docs/adr/ADR-0005-authentication.md)     |
+| Concern  | Decision                                                                   | ADR                                                 |
+| -------- | -------------------------------------------------------------------------- | --------------------------------------------------- |
+| Hosting  | Cloudflare Workers + D1 + Cron Triggers, under a **portability charter**   | [ADR-0001](docs/adr/ADR-0001-cloudflare-hosting.md) |
+| Database | Cloudflare D1 (SQLite), repository layer, SQL migrations in git            | [ADR-0002](docs/adr/ADR-0002-d1-database.md)        |
+| AI       | `Summariser` interface → Workers AI via OpenAI-compatible HTTP endpoint    | [ADR-0003](docs/adr/ADR-0003-ai-provider.md)        |
+| Email    | Resend behind a `Mailer` interface (plain `fetch`)                         | [ADR-0004](docs/adr/ADR-0004-email-delivery.md)     |
+| Auth     | Better Auth + Drizzle D1; Google OAuth and PBKDF2 email/password callbacks | [ADR-0005](docs/adr/ADR-0005-authentication.md)     |
 
-Runtime npm dependencies from all decisions above: **zero** — all integrations
-are plain `fetch` / WebCrypto. New dependencies require owner authorisation via
-[docs/DEPENDENCIES.md](docs/DEPENDENCIES.md).
+Auth uses owner-authorised Better Auth/Drizzle runtime dependencies; other
+external providers remain behind plain `fetch` / WebCrypto interfaces. All
+packages are tracked in [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md).
 
 ## For agents (human or AI)
 

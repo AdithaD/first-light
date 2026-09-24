@@ -1,43 +1,45 @@
 import { env } from '$env/dynamic/private';
 import { fail, redirect } from '@sveltejs/kit';
-import { setSessionCookie } from '$lib/server/auth/cookies';
-import {
-  createDefaultAuthService,
-  EmailTakenError,
-  InvalidEmailError,
-  WeakPasswordError,
-} from '$lib/server/auth/service';
 
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
-const MESSAGES: Record<string, string> = {
-  InvalidEmailError: 'Enter a valid email address.',
-  WeakPasswordError: 'Password must be at least 10 characters.',
-  EmailTakenError: 'That email is already registered.',
-};
+export const load: PageServerLoad = ({ url }) => ({
+  googleConfigured: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
+  oauthMessage: url.searchParams.get('error')
+    ? 'Google sign-in did not complete. Please try again.'
+    : null,
+});
 
 export const actions: Actions = {
-  default: async ({ request, locals, cookies }) => {
+  default: async ({ request, locals }) => {
     const data = await request.formData();
     const email = String(data.get('email') ?? '');
     const password = String(data.get('password') ?? '');
-    const displayName = String(data.get('displayName') ?? '').trim() || undefined;
+    const name = String(data.get('displayName') ?? '').trim();
 
-    if (!locals.db) return fail(500, { error: 'Database unavailable.' });
+    if (!locals.auth) return fail(503, { error: 'Authentication is not available.' });
+    if (!name) return fail(400, { error: 'Enter your name.' });
+    if (password.length < 10)
+      return fail(400, { error: 'Password must be at least 10 characters.' });
 
-    const iterations = Number(env.AUTH_PBKDF2_ITERATIONS) || undefined;
     try {
-      const auth = createDefaultAuthService(locals.db, iterations);
-      const raw = await auth.signup({ email, password, displayName });
-      setSessionCookie(cookies, raw);
-    } catch (e) {
-      if (
-        e instanceof InvalidEmailError ||
-        e instanceof WeakPasswordError ||
-        e instanceof EmailTakenError
-      )
-        return fail(400, { error: MESSAGES[e.constructor.name] });
-      throw e; // includes SvelteKit's own Redirect/HttpError — always rethrow
+      const response = await locals.auth.api.signUpEmail({
+        body: { name, email: email.trim().toLowerCase(), password },
+        headers: request.headers,
+        asResponse: true,
+      });
+      if (!response.ok) return fail(400, { error: 'Unable to create your account.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      if (message.toLowerCase().includes('email') || message.toLowerCase().includes('exist')) {
+        return fail(400, {
+          error:
+            'That email already has an account. Sign in with its existing method; for Google accounts, add a password from account settings.',
+        });
+      }
+      return fail(400, {
+        error: 'Unable to create your account. Check your details and try again.',
+      });
     }
     redirect(303, '/account');
   },

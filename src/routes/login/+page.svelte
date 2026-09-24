@@ -1,11 +1,30 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
 
-  let { form } = $props();
+  let { form, data } = $props();
 </script>
 
 <main class="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-6">
   <h1 class="text-3xl font-semibold">Log in</h1>
+
+  {#if data.oauthMessage}
+    <p class="rounded border border-amber-800 bg-amber-950 px-3 py-2 text-sm text-amber-200">
+      {data.oauthMessage}
+    </p>
+  {/if}
+
+  {#if data.googleConfigured}
+    <a
+      href={resolve('/auth/google')}
+      class="rounded border border-slate-600 px-4 py-2 text-center text-sm hover:bg-slate-800"
+    >
+      Continue with Google
+    </a>
+  {:else}
+    <p class="text-center text-sm text-slate-500">Google sign-in is not configured yet.</p>
+  {/if}
+
+  <div class="text-center text-xs text-slate-500">or log in with email</div>
 
   <form method="POST" class="flex flex-col gap-4">
     <label class="flex flex-col gap-1 text-sm">

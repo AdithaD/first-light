@@ -29,12 +29,12 @@ plain `fetch` clients living in `src/lib/server/integrations/<provider>/`.
 Swapping a provider = new implementation + env config — never an app-code
 change.
 
-| Interface                                                | Implementations (MVP)                   | Documented alternatives                                   |
-| -------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------- |
-| `Summariser`                                             | Workers AI (OpenAI-compatible endpoint) | OpenRouter (config-only swap) — ADR-0003                  |
-| `Mailer`                                                 | Resend REST                             | Postmark, SES — ADR-0004                                  |
-| `UserRepository`, `BriefRepository`, `SessionRepository` | D1                                      | (charter: D1 only; export runbook is the exit) — ADR-0002 |
-| `NewsProvider`, `WeatherProvider`                        | Guardian AU, ABC RSS; Open-Meteo        | see DATA_SOURCES.md                                       |
+| Interface                           | Implementations (MVP)                     | Documented alternatives                                        |
+| ----------------------------------- | ----------------------------------------- | -------------------------------------------------------------- |
+| `Summariser`                        | Workers AI (OpenAI-compatible endpoint)   | OpenRouter (config-only swap) — ADR-0003                       |
+| `Mailer`                            | Resend REST                               | Postmark, SES — ADR-0004                                       |
+| `UserRepository`, `BriefRepository` | D1; auth tables via Better Auth + Drizzle | (charter: D1 only; export runbook is the exit) — ADR-0002/0005 |
+| `NewsProvider`, `WeatherProvider`   | Guardian AU, ABC RSS; Open-Meteo          | see DATA_SOURCES.md                                            |
 
 ## Brief engine
 
@@ -45,17 +45,17 @@ change.
   duplicate briefs on cron overlap/retry.
 - **Graceful degradation:** each step returns a section with
   `ok | empty | failed` status; a partial brief always beats no brief.
-- CPU note (ADR-0001): Worker CPU limits apply to active execution, not network wait. Do not assume WebCrypto PBKDF2 is free from CPU accounting: Cloudflare documents PBKDF2 support, but does not explicitly specify its CPU-metering behavior. The auth default of 100,000 iterations is provisional and MUST be measured on a deployed Worker before production auth is enabled; Node/local timings are not a substitute. Record measured CPU and plan limits here before selecting the production value.
+- CPU note (ADR-0001): Worker CPU limits apply to active execution, not network wait. Password hashing uses the owner-approved PBKDF2 callback described in ADR-0005.
 
 ## Data model (initial)
 
-```sql
-users             (id, email UNIQUE, created_at, ...)
-password_credentials (user_id PK→users, password_hash)             -- ADR-0005
-oauth_accounts    (provider, provider_account_id, user_id→users,
-                   PRIMARY KEY(provider, provider_account_id))     -- ADR-0005
-sessions          (id (hashed token), user_id→users, expires_at)  -- ADR-0005
-```
+Better Auth tables (`user`, `session`, `account`, `verification`) are owned by
+the Drizzle schema in `src/lib/server/auth/schema.ts`. Reviewed SQL is committed
+as `migrations/0002_better_auth.sql` and applied via Wrangler. Drizzle Kit output is reviewed, then copied/renumbered into `migrations/`; only
+Wrangler's ordered SQL migrations are applied to D1.
+Legacy custom auth tables from migration 0001 remain in schema history but are
+unused; migration 0002 adds Better Auth tables locally. App-owned tables remain
+explicit SQL/repository work for their phases.
 
 - **Deferred:** `user_preferences` (locality/interests/brief time) — the
   interests representation (free-form vs curated options) is an open design
@@ -64,46 +64,49 @@ sessions          (id (hashed token), user_id→users, expires_at)  -- ADR-0005
 - Migrations: plain SQL in `migrations/`, applied via
   `wrangler d1 migrations apply first-light` (add `--local` for dev); schema
   is the source of truth in git.
-- Auth linking: OAuth sign-in with a verified email matching an existing
-  account links to it automatically (documented policy, ADR-0005).
 
-### Password and session implementation (Phase 2)
+### Auth and database integration (Phase 2)
 
-- Password hash format: `pbkdf2$sha256$<iterations>$<salt-base64url>$<hash-base64url>`;
-  WebCrypto PBKDF2-SHA256, random 16-byte salt, 256-bit derived value,
-  constant-time comparison. No password or raw session token is stored.
-- `AUTH_PBKDF2_ITERATIONS` defaults to **100,000** (owner-approved MVP
-  setting, 2026-09-24). A temporary isolated Worker with the account's default
-  CPU limit completed 100,000 iterations in six trials. 150,000 returned
-  Cloudflare error 1101 twice; this status alone does not prove CPU exhaustion,
-  and no exact per-request CPU-ms measurement was obtained. Lower tested values
-  (10k–75k) also succeeded. This is an empirical compatibility check, not a
-  security-strength certification. Owner accepts 100k for MVP and will consider
-  Workers Paid if stronger password-hash work factor is needed.
-- Sessions use 32 random bytes in a base64url cookie; D1 stores only the
-  SHA-256 token digest. Cookie flags: `HttpOnly; SameSite=Lax; Secure` in
-  production, path `/`, 30-day max-age; the database TTL and cookie TTL match.
-  Expired sessions are rejected and lazily deleted; expiry slides when under
-  half the TTL remains.
-- Auth forms use SvelteKit's same-origin POST protection. Logout is POST-only.
-- Node 24 LTS, pnpm, Wrangler local D1, Node built-in SQLite repository tests.
+- Better Auth handles Google OAuth, account linking, sessions/cookies, and
+  email/password auth endpoints. Our PBKDF2 module is supplied via custom hash
+  and verify callbacks; hashes are stored in `account.password` for
+  `provider_id='credential'` (ADR-0005). Keep existing SvelteKit form UX using
+  thin wrappers around Better Auth server APIs.
+- Better Auth uses Drizzle's D1 driver (`drizzle-orm/d1`) and adapter
+  (`better-auth/adapters/drizzle`, provider `sqlite`).
+- D1 does not support interactive transactions. Exercise sign-up, sign-in,
+  social callback, session refresh and linking in Wrangler's D1 emulator.
+- SvelteKit integration mounts `svelteKitHandler` in `hooks.server.ts`; the
+  `sveltekitCookies(getRequestEvent)` plugin is enabled for action cookies.
+- OAuth linking uses verified Google email; do not add Google to trusted-provider
+  bypass settings. An existing Google-only user can add a credential login while
+  authenticated using Better Auth `setPassword`; this writes the PBKDF2 callback
+  hash to that same user's `credential` account. Credential users change passwords
+  through Better Auth `changePassword`, which verifies their current password and
+  revokes other sessions. Set canonical `BETTER_AUTH_URL` explicitly.
+- Legacy `migrations/0001_users_and_auth.sql` is retained as applied history but
+  its tables are unused. Better Auth schema is `migrations/0002_better_auth.sql`;
+  it has been applied locally only, not remotely.
+- Node 24 LTS, pnpm, Wrangler local D1. Auth integration tests use the real
+  Worker/D1 emulator; PBKDF2 callback behavior is unit-tested.
 
 ## Configuration / env vars
 
-| Var                                         | Scope  | Purpose                                                                                                    |
-| ------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
-| `AI_ACCOUNT_ID`, `AI_API_TOKEN`             | secret | Workers AI REST endpoint auth                                                                              |
-| `AI_MODEL`                                  | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`)                                                                |
-| `RESEND_API_KEY`                            | secret | Email sending                                                                                              |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | OAuth                                                                                                      |
-| `GUARDIAN_API_KEY`                          | secret | News source                                                                                                |
-| `APP_ORIGIN`                                | config | Base URL (OAuth redirects, email links)                                                                    |
-| `AUTH_PBKDF2_ITERATIONS`                    | config | Password-hash work factor (default 100,000; owner-approved MVP value; revisit with Workers Paid if needed) |
+| Var                                         | Scope  | Purpose                                           |
+| ------------------------------------------- | ------ | ------------------------------------------------- |
+| `AI_ACCOUNT_ID`, `AI_API_TOKEN`             | secret | Workers AI REST endpoint auth                     |
+| `AI_MODEL`                                  | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`)       |
+| `RESEND_API_KEY`                            | secret | Email sending                                     |
+| `BETTER_AUTH_SECRET`                        | secret | Better Auth secret (at least 32 random bytes)     |
+| `BETTER_AUTH_URL`                           | config | Explicit canonical app origin for OAuth callbacks |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | Google social provider credentials                |
+| `GUARDIAN_API_KEY`                          | secret | News source                                       |
+| `APP_ORIGIN`                                | config | Base URL for email and app links                  |
 
 Secrets are set via `wrangler secret put` (prod) and `.env` (local dev);
 `.env.example` documents all of them. Never commit real values.
 
 ## Local development
 
-- Node **24 LTS**, **pnpm**, `wrangler dev` (local D1 emulation). Tests use built-in `node:sqlite` with the actual migrations; route integration smoke tests use Wrangler's local Worker + D1 emulator.
+- Node **24 LTS**, **pnpm**, `wrangler dev` (local D1 emulation). Auth integration is exercised in Wrangler's Worker/D1 emulator; password hashing callbacks are unit-tested directly.
 - Commands are established in Phase 1 and recorded here.

@@ -1,15 +1,16 @@
 /**
- * Password hashing via WebCrypto PBKDF2-SHA256 (ADR-0005).
- * Workers-native (no binaries). Format:
+ * Password hashing via WebCrypto PBKDF2-SHA256, passed to Better Auth through
+ * its custom emailAndPassword.password hash/verify callbacks (ADR-0005).
+ * Workers-native (no binaries). Stored format:
  *   pbkdf2$sha256$<iterations>$<salt-b64url>$<hash-b64url>
- * Iterations are configurable (AUTH_PBKDF2_ITERATIONS) because hashing runs
- * inside the Worker and counts against the CPU budget (ADR-0001). Default
- * 100k is the owner-approved MVP work factor (tested on a temporary deployed
- * Worker; see ARCHITECTURE.md). Revisit if the threat model changes or Workers
- * Paid is adopted.
+ * The owner-approved MVP work factor is 100k iterations, tested on a temporary
+ * deployed Worker (see ARCHITECTURE.md).
  */
 const DEFAULT_ITERATIONS = 100_000;
 const SALT_BYTES = 16;
+export interface PasswordHashOptions {
+  iterations?: number;
+}
 const HASH_BITS = 256;
 
 const te = new TextEncoder();
@@ -46,7 +47,7 @@ async function deriveBits(
 
 export async function hashPassword(
   password: string,
-  opts: { iterations?: number } = {},
+  opts: PasswordHashOptions = {},
 ): Promise<string> {
   const iterations = opts.iterations ?? DEFAULT_ITERATIONS;
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));

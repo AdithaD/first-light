@@ -3,8 +3,7 @@
  *
  * We deliberately do NOT import `@cloudflare/workers-types`: the real D1
  * binding satisfies this interface, and tests provide their own
- * implementation (`testing.ts` — real SQLite via node:sqlite). This keeps
- * the dependency surface at zero and the repository layer portable
+ * implementation where needed. This keeps the repository layer portable
  * (charter, ADR-0001).
  */
 export interface DbStatement {

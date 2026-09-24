@@ -1,27 +1,30 @@
 import { env } from '$env/dynamic/private';
 import { fail, redirect } from '@sveltejs/kit';
-import { setSessionCookie } from '$lib/server/auth/cookies';
-import { createDefaultAuthService, InvalidCredentialsError } from '$lib/server/auth/service';
+import type { Actions, PageServerLoad } from './$types';
 
-import type { Actions } from './$types';
+export const load: PageServerLoad = ({ url }) => ({
+  googleConfigured: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
+  oauthMessage: url.searchParams.get('error')
+    ? 'Google sign-in did not complete. Please try again.'
+    : null,
+});
 
 export const actions: Actions = {
-  default: async ({ request, locals, cookies }) => {
+  default: async ({ request, locals }) => {
     const data = await request.formData();
     const email = String(data.get('email') ?? '');
     const password = String(data.get('password') ?? '');
 
-    if (!locals.db) return fail(500, { error: 'Database unavailable.' });
-
-    const iterations = Number(env.AUTH_PBKDF2_ITERATIONS) || undefined;
+    if (!locals.auth) return fail(503, { error: 'Authentication is not available.' });
     try {
-      const auth = createDefaultAuthService(locals.db, iterations);
-      const raw = await auth.login({ email, password });
-      setSessionCookie(cookies, raw);
-    } catch (e) {
-      if (e instanceof InvalidCredentialsError)
-        return fail(400, { error: 'Invalid email or password.' });
-      throw e;
+      const response = await locals.auth.api.signInEmail({
+        body: { email: email.trim().toLowerCase(), password },
+        headers: request.headers,
+        asResponse: true,
+      });
+      if (!response.ok) return fail(400, { error: 'Invalid email or password.' });
+    } catch {
+      return fail(400, { error: 'Invalid email or password.' });
     }
     redirect(303, '/account');
   },
