@@ -20,7 +20,7 @@ Status at each gate is recorded inline. Decisions reference
 - [x] `.nvmrc` pin committed — **Node 24** (owner tick; local runtime upgrade to 24 pending on owner machine)
 - [x] Tooling: ESLint (`typescript-eslint` + `globals` authorised, owner tick Step 4) / Prettier / Vitest — first unit tests (2) passing; `lint`/`format`/`test` scripts
 - [x] Home page + layout, `/health` endpoint (verified via wrangler dev), `.env.example`
-- CI: lint + typecheck + unit tests on push (Step 5 — needs GitHub remote)
+- [x] CI: lint + typecheck + unit tests + build on push — **first run green** (repo: github.com/AdithaD/first-light; deploy stays manual until Phase 7)
 - **Gate:** first deployment of the empty pipeline to Workers (proves hosting, DNS, CI end-to-end)
 
 ## Phase 2 — Users & preferences
