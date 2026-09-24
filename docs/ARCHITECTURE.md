@@ -53,20 +53,18 @@ change.
 
 ```sql
 users             (id, email UNIQUE, created_at, ...)
-password_credentials (user_id PK→users, password_hash NULLABLE)   -- ADR-0005
+password_credentials (user_id PK→users, password_hash)             -- ADR-0005
 oauth_accounts    (provider, provider_account_id, user_id→users,
                    PRIMARY KEY(provider, provider_account_id))     -- ADR-0005
 sessions          (id (hashed token), user_id→users, expires_at)  -- ADR-0005
-user_preferences  (user_id PK→users, suburb, latitude, longitude,
-                   timezone, interests_json, brief_time_local,
-                   delivery_web, delivery_email)
-briefs            (id, user_id→users, brief_date, status,
-                   content_json, created_at,
-                   UNIQUE(user_id, brief_date))
 ```
 
+- **Deferred:** `user_preferences` (locality/interests/brief time) — the
+  interests representation (free-form vs curated options) is an open design
+  question the owner wants to deliberate before Phase 3. Auth ships first.
 - All timestamps stored UTC; rendered in user's timezone (`Intl`).
-- Migrations: plain SQL in `migrations/`, applied via `wrangler d1`; schema
+- Migrations: plain SQL in `migrations/`, applied via
+  `wrangler d1 migrations apply first-light` (add `--local` for dev); schema
   is the source of truth in git.
 - Auth linking: OAuth sign-in with a verified email matching an existing
   account links to it automatically (documented policy, ADR-0005).

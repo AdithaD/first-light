@@ -26,15 +26,23 @@ Status at each gate is recorded inline. Decisions reference
   `{"status":"ok","version":"0.1.0",...}` (2026-09-24); D1 `first-light` created
   and bound (`DB`); DNS/TLS via workers.dev; CI green; hosting proven end-to-end
 
-## Phase 2 — Users & preferences
+## Phase 2 — Users & auth (preferences deferred)
 
-- Auth: signup/login, **email+password (WebCrypto PBKDF2)** and **Google OAuth** as equal first-class flows; shared session layer on D1 (ADR-0005)
-- 🔑 Google Cloud OAuth client (test-mode consent screen)
-- D1 schema + migration workflow: `users`, `sessions`, `oauth_accounts`, `user_preferences` (locality → lat/long, interests, brief time, delivery prefs)
-- Settings UI; repository layer established
-- **Gate:** a user can sign up (both ways), set preferences, persist across sessions
+Owner decision 2026-09-24: interests/brief-time representation (free-form vs
+curated) will be deliberately designed **before Phase 3** — auth ships first.
+
+- [x] Auth schema migration approved & applied (`migrations/0001_users_and_auth.sql`: users, password_credentials, oauth_accounts, sessions)
+- [ ] Migration workflow verified local & remote (`wrangler d1 migrations apply`)
+- [ ] Repository layer over D1 (`UserRepository`/`SessionRepository`), unit-tested
+- [ ] Auth: email+password (WebCrypto PBKDF2), session cookies, signup/login/logout, protected routes
+- [ ] Auth: Google OAuth (authorization-code flow, verified-email auto-linking) — 🔑 owner creates Google Cloud OAuth client
+- [ ] Phase verification: full walkthrough both paths, CI green, deploy
 
 ## Phase 3 — Data ingestion
+
+⛔ **Gate-first decision:** interests/brief-time representation (free-form vs
+curated options vs hybrid) must be designed and recorded (ADR-0006) before
+ingestion code — it shapes `user_preferences` and the onboarding UI.
 
 - 🔑/free Integration clients behind interfaces, unit-tested with mocked `fetch`:
   - Weather: **Open-Meteo** (free, no key)
