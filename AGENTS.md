@@ -17,14 +17,14 @@ documentation truthful.
 
 1. **Dependency gate.** NEVER install, import, or upgrade any package without
    owner authorisation recorded in `docs/DEPENDENCIES.md` (status must move
-   from *proposed* → *authorised* first). This applies to transitive
+   from _proposed_ → _authorised_ first). This applies to transitive
    "convenience" imports too.
 2. **Portability charter.** Target plain Workers + D1. NEVER adopt:
    Cloudflare Workflows, KV, Queues, R2, Durable Objects, or native bindings
    (`env.AI`). All external services are called via plain `fetch`; all state
    lives in D1 behind a repository layer. See ADR-0001.
 3. **Decision-change protocol.** Locked ADR decisions change only with the
-   owner's explicit approval, recorded as a new/amended ADR *before* the code
+   owner's explicit approval, recorded as a new/amended ADR _before_ the code
    changes. Never contradict an ADR silently. If you spot a conflict between
    code and ADR, flag it — do not pick a side.
 4. **Workers runtime.** No native/binary Node modules; WebCrypto over crypto

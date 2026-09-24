@@ -5,7 +5,7 @@
 ## Context
 
 Daily brief emails (MVP volume: handful/day). Cloudflare has no native
-*sending* (Email Workers receive/route only; MailChannels free path closed
+_sending_ (Email Workers receive/route only; MailChannels free path closed
 2024). Must be callable from Workers via plain HTTP (charter).
 
 ## Decision

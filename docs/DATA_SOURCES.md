@@ -6,16 +6,16 @@ brief must attribute its sources with links.
 
 ## Weather
 
-| Source | Auth | Free tier | Contract notes | Status |
-|---|---|---|---|---|
+| Source                                | Auth | Free tier                        | Contract notes                                                        | Status         |
+| ------------------------------------- | ---- | -------------------------------- | --------------------------------------------------------------------- | -------------- |
 | **Open-Meteo** (`api.open-meteo.com`) | none | Non-commercial free, 10k req/day | Forecast + current by lat/long; daily/hourly fields; good AU coverage | Selected (MVP) |
 
 ## News
 
-| Source | Auth | Free tier | Contract notes | Status |
-|---|---|---|---|---|
-| **Guardian Australia** (content API: `content.guardianapis.com`) | free API key | Open, rate-limited | Filter by edition/section; returns thumbnails + standfirst; JSON | Selected (MVP) |
-| **ABC News** RSS feeds (`abc.net.au/news/feed/...`) | none | Public | Per-topic feeds; XML → parse & trim to needed fields; respect cadence | Selected (MVP) |
+| Source                                                           | Auth         | Free tier          | Contract notes                                                        | Status         |
+| ---------------------------------------------------------------- | ------------ | ------------------ | --------------------------------------------------------------------- | -------------- |
+| **Guardian Australia** (content API: `content.guardianapis.com`) | free API key | Open, rate-limited | Filter by edition/section; returns thumbnails + standfirst; JSON      | Selected (MVP) |
+| **ABC News** RSS feeds (`abc.net.au/news/feed/...`)              | none         | Public             | Per-topic feeds; XML → parse & trim to needed fields; respect cadence | Selected (MVP) |
 
 ## Client rules (all sources)
 

@@ -27,7 +27,7 @@ are the documented spend escalation paths.
 ## Alternatives considered
 
 - **Vercel AI SDK + OpenRouter** — best flexibility/prose; rejected for now
-  to keep zero runtime deps (`ai` package remains *proposed* in
+  to keep zero runtime deps (`ai` package remains _proposed_ in
   DEPENDENCIES.md; re-authorise on adoption).
 - **Direct single-vendor SDK** (Anthropic/OpenAI) — most coupled for least flexibility.
 - **Native Workers AI binding** — charter violation (rejected).

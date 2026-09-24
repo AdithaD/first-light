@@ -22,13 +22,13 @@ expand later).
 
 ## Locked architecture (decided — see ADRs)
 
-| Concern | Decision | ADR |
-|---|---|---|
-| Hosting | Cloudflare Workers + D1 + Cron Triggers, under a **portability charter** | [ADR-0001](docs/adr/ADR-0001-cloudflare-hosting.md) |
-| Database | Cloudflare D1 (SQLite), repository layer, SQL migrations in git | [ADR-0002](docs/adr/ADR-0002-d1-database.md) |
-| AI | `Summariser` interface → Workers AI via OpenAI-compatible HTTP endpoint | [ADR-0003](docs/adr/ADR-0003-ai-provider.md) |
-| Email | Resend behind a `Mailer` interface (plain `fetch`) | [ADR-0004](docs/adr/ADR-0004-email-delivery.md) |
-| Auth | Lucia-style sessions on D1; email+password **and** Google OAuth, equal coexistence | [ADR-0005](docs/adr/ADR-0005-authentication.md) |
+| Concern  | Decision                                                                           | ADR                                                 |
+| -------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Hosting  | Cloudflare Workers + D1 + Cron Triggers, under a **portability charter**           | [ADR-0001](docs/adr/ADR-0001-cloudflare-hosting.md) |
+| Database | Cloudflare D1 (SQLite), repository layer, SQL migrations in git                    | [ADR-0002](docs/adr/ADR-0002-d1-database.md)        |
+| AI       | `Summariser` interface → Workers AI via OpenAI-compatible HTTP endpoint            | [ADR-0003](docs/adr/ADR-0003-ai-provider.md)        |
+| Email    | Resend behind a `Mailer` interface (plain `fetch`)                                 | [ADR-0004](docs/adr/ADR-0004-email-delivery.md)     |
+| Auth     | Lucia-style sessions on D1; email+password **and** Google OAuth, equal coexistence | [ADR-0005](docs/adr/ADR-0005-authentication.md)     |
 
 Runtime npm dependencies from all decisions above: **zero** — all integrations
 are plain `fetch` / WebCrypto. New dependencies require owner authorisation via
@@ -43,14 +43,14 @@ authorisation, recorded in a written decision record.**
 
 ## Documentation map
 
-| File | Purpose |
-|---|---|
-| [ROADMAP.md](ROADMAP.md) | Phase plan, gates, current status |
-| [AGENTS.md](AGENTS.md) | Operating rules for every contributing agent |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, modules, interfaces, limits |
-| [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Weather/news source registry & contracts |
-| [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) | Dependency authorisation manifest |
-| [docs/adr/](docs/adr/) | Decision records (ADRs) |
+| File                                         | Purpose                                      |
+| -------------------------------------------- | -------------------------------------------- |
+| [ROADMAP.md](ROADMAP.md)                     | Phase plan, gates, current status            |
+| [AGENTS.md](AGENTS.md)                       | Operating rules for every contributing agent |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, modules, interfaces, limits   |
+| [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) | Weather/news source registry & contracts     |
+| [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) | Dependency authorisation manifest            |
+| [docs/adr/](docs/adr/)                       | Decision records (ADRs)                      |
 
 ## Local development (from Phase 1)
 

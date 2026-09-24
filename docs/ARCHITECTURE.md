@@ -29,12 +29,12 @@ plain `fetch` clients living in `src/lib/server/integrations/<provider>/`.
 Swapping a provider = new implementation + env config — never an app-code
 change.
 
-| Interface | Implementations (MVP) | Documented alternatives |
-|---|---|---|
-| `Summariser` | Workers AI (OpenAI-compatible endpoint) | OpenRouter (config-only swap) — ADR-0003 |
-| `Mailer` | Resend REST | Postmark, SES — ADR-0004 |
-| `UserRepository`, `BriefRepository`, `SessionRepository` | D1 | (charter: D1 only; export runbook is the exit) — ADR-0002 |
-| `NewsProvider`, `WeatherProvider` | Guardian AU, ABC RSS; Open-Meteo | see DATA_SOURCES.md |
+| Interface                                                | Implementations (MVP)                   | Documented alternatives                                   |
+| -------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------- |
+| `Summariser`                                             | Workers AI (OpenAI-compatible endpoint) | OpenRouter (config-only swap) — ADR-0003                  |
+| `Mailer`                                                 | Resend REST                             | Postmark, SES — ADR-0004                                  |
+| `UserRepository`, `BriefRepository`, `SessionRepository` | D1                                      | (charter: D1 only; export runbook is the exit) — ADR-0002 |
+| `NewsProvider`, `WeatherProvider`                        | Guardian AU, ABC RSS; Open-Meteo        | see DATA_SOURCES.md                                       |
 
 ## Brief engine
 
@@ -73,14 +73,14 @@ briefs            (id, user_id→users, brief_date, status,
 
 ## Configuration / env vars
 
-| Var | Scope | Purpose |
-|---|---|---|
-| `AI_ACCOUNT_ID`, `AI_API_TOKEN` | secret | Workers AI REST endpoint auth |
-| `AI_MODEL` | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`) |
-| `RESEND_API_KEY` | secret | Email sending |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | OAuth |
-| `GUARDIAN_API_KEY` | secret | News source |
-| `APP_ORIGIN` | config | Base URL (OAuth redirects, email links) |
+| Var                                         | Scope  | Purpose                                     |
+| ------------------------------------------- | ------ | ------------------------------------------- |
+| `AI_ACCOUNT_ID`, `AI_API_TOKEN`             | secret | Workers AI REST endpoint auth               |
+| `AI_MODEL`                                  | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`) |
+| `RESEND_API_KEY`                            | secret | Email sending                               |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | OAuth                                       |
+| `GUARDIAN_API_KEY`                          | secret | News source                                 |
+| `APP_ORIGIN`                                | config | Base URL (OAuth redirects, email links)     |
 
 Secrets are set via `wrangler secret put` (prod) and `.env` (local dev);
 `.env.example` documents all of them. Never commit real values.

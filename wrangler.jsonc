@@ -1,20 +1,20 @@
 // Cloudflare Workers config (ADR-0001). Run `pnpm build` before `wrangler dev`/deploy.
 {
-	"name": "first-light",
-	"compatibility_date": "2026-09-24",
-	"main": ".svelte-kit/cloudflare/_worker.js",
-	"assets": {
-		"directory": ".svelte-kit/cloudflare",
-		"binding": "ASSETS"
-	},
-	// D1 (ADR-0002). Local dev uses an emulated DB automatically.
-	// database_id is a placeholder until first deployment (Phase 1, Step 6).
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "first-light",
-			"database_id": "00000000-0000-0000-0000-000000000000"
-		}
-	]
-	// Cron Trigger added in Phase 5 with the brief engine (ROADMAP.md).
+  "name": "first-light",
+  "compatibility_date": "2026-09-24",
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "assets": {
+    "directory": ".svelte-kit/cloudflare",
+    "binding": "ASSETS",
+  },
+  // D1 (ADR-0002). Local dev uses an emulated DB automatically.
+  // database_id is a placeholder until first deployment (Phase 1, Step 6).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "first-light",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+    },
+  ],
+  // Cron Trigger added in Phase 5 with the brief engine (ROADMAP.md).
 }

@@ -36,7 +36,7 @@ OAuth desirable.
 
 ## Consequences / triggers to revisit
 
-- **Trigger:** adding a *second* OAuth provider → formally re-evaluate
+- **Trigger:** adding a _second_ OAuth provider → formally re-evaluate
   Auth.js / Better Auth (recorded so it isn't forgotten).
 - Session security details (cookie flags, rotation, expiry) implemented in
   Phase 2 and unit-tested.
