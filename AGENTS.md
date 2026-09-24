@@ -59,7 +59,9 @@ documentation truthful.
   `src/lib/server/integrations/<provider>` per external service,
   `src/routes/**` for UI/endpoints, `migrations/*.sql` for D1 schema.
 - Tests: unit tests for every integration client (mocked `fetch`) and brief
-  step; E2E smoke via Playwright from Phase 6.
+  step; repository SQL tested with built-in SQLite + actual migrations; auth
+  route integration exercised in Wrangler's D1 emulator; E2E smoke via
+  Playwright from Phase 6.
 - Error handling: typed errors per module; user-facing copy in Australian
   English ("customise", "organise").
 - Dates/times: store UTC in D1; render in the user's timezone (`Intl`), which

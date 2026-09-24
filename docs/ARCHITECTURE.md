@@ -45,9 +45,7 @@ change.
   duplicate briefs on cron overlap/retry.
 - **Graceful degradation:** each step returns a section with
   `ok | empty | failed` status; a partial brief always beats no brief.
-- CPU note (ADR-0001): wall-clock waiting is free on Workers; the ~10ms
-  budget covers parsing/assembly (~5–10ms projected). Trim payloads
-  per-source before heavy parsing.
+- CPU note (ADR-0001): Worker CPU limits apply to active execution, not network wait. Do not assume WebCrypto PBKDF2 is free from CPU accounting: Cloudflare documents PBKDF2 support, but does not explicitly specify its CPU-metering behavior. The auth default of 100,000 iterations is provisional and MUST be measured on a deployed Worker before production auth is enabled; Node/local timings are not a substitute. Record measured CPU and plan limits here before selecting the production value.
 
 ## Data model (initial)
 
@@ -69,21 +67,41 @@ sessions          (id (hashed token), user_id→users, expires_at)  -- ADR-0005
 - Auth linking: OAuth sign-in with a verified email matching an existing
   account links to it automatically (documented policy, ADR-0005).
 
+### Password and session implementation (Phase 2)
+
+- Password hash format: `pbkdf2$sha256$<iterations>$<salt-base64url>$<hash-base64url>`;
+  WebCrypto PBKDF2-SHA256, random 16-byte salt, 256-bit derived value,
+  constant-time comparison. No password or raw session token is stored.
+- `AUTH_PBKDF2_ITERATIONS` currently defaults to **100,000 provisionally**.
+  Cloudflare documents PBKDF2 support but does not state whether its async
+  `deriveBits()` work is excluded from Worker CPU accounting. Local Node time
+  is not evidence of deployed Worker CPU usage. **Before enabling production
+  signup, measure this on a deployed Worker and record the CPU result/plan
+  limit; adjust the work factor if necessary.**
+- Sessions use 32 random bytes in a base64url cookie; D1 stores only the
+  SHA-256 token digest. Cookie flags: `HttpOnly; SameSite=Lax; Secure` in
+  production, path `/`, 30-day max-age; the database TTL and cookie TTL match.
+  Expired sessions are rejected and lazily deleted; expiry slides when under
+  half the TTL remains.
+- Auth forms use SvelteKit's same-origin POST protection. Logout is POST-only.
+- Node 24 LTS, pnpm, Wrangler local D1, Node built-in SQLite repository tests.
+
 ## Configuration / env vars
 
-| Var                                         | Scope  | Purpose                                     |
-| ------------------------------------------- | ------ | ------------------------------------------- |
-| `AI_ACCOUNT_ID`, `AI_API_TOKEN`             | secret | Workers AI REST endpoint auth               |
-| `AI_MODEL`                                  | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`) |
-| `RESEND_API_KEY`                            | secret | Email sending                               |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | OAuth                                       |
-| `GUARDIAN_API_KEY`                          | secret | News source                                 |
-| `APP_ORIGIN`                                | config | Base URL (OAuth redirects, email links)     |
+| Var                                         | Scope  | Purpose                                                                                  |
+| ------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `AI_ACCOUNT_ID`, `AI_API_TOKEN`             | secret | Workers AI REST endpoint auth                                                            |
+| `AI_MODEL`                                  | config | Model slug (e.g. `@cf/openai/gpt-oss-120b`)                                              |
+| `RESEND_API_KEY`                            | secret | Email sending                                                                            |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | secret | OAuth                                                                                    |
+| `GUARDIAN_API_KEY`                          | secret | News source                                                                              |
+| `APP_ORIGIN`                                | config | Base URL (OAuth redirects, email links)                                                  |
+| `AUTH_PBKDF2_ITERATIONS`                    | config | Provisional password-hash work factor; must be measured on Workers before production use |
 
 Secrets are set via `wrangler secret put` (prod) and `.env` (local dev);
 `.env.example` documents all of them. Never commit real values.
 
 ## Local development
 
-- Node **22 LTS**, **pnpm**, `wrangler dev` (local D1 emulation).
+- Node **24 LTS**, **pnpm**, `wrangler dev` (local D1 emulation). Tests use built-in `node:sqlite` with the actual migrations; route integration smoke tests use Wrangler's local Worker + D1 emulator.
 - Commands are established in Phase 1 and recorded here.

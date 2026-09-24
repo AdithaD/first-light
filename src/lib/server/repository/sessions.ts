@@ -1,7 +1,9 @@
 import type { Database } from './db';
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-const COOKIE_NAME = 'fl_session';
+
+/** Cookie name, also imported by the auth cookie helpers (single source of truth). */
+export const SESSION_COOKIE_NAME = 'fl_session';
 
 export interface SessionUser {
   userId: string;
@@ -39,8 +41,6 @@ export function createSessionRepository(
   }
 
   return {
-    COOKIE_NAME,
-
     /** Creates a session; returns the RAW token (goes in the cookie). Only its hash is stored. */
     async create(userId: string): Promise<string> {
       const raw = newRawToken();
@@ -48,7 +48,8 @@ export function createSessionRepository(
       const nowMs = now();
       await db
         .prepare('INSERT INTO sessions (id, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)')
-        .run(id, userId, new Date(nowMs + ttlMs).toISOString(), new Date(nowMs).toISOString());
+        .bind(id, userId, new Date(nowMs + ttlMs).toISOString(), new Date(nowMs).toISOString())
+        .run();
       return raw;
     },
 
@@ -66,17 +67,21 @@ export function createSessionRepository(
 					 FROM sessions s JOIN users u ON u.id = s.user_id
 					 WHERE s.id = ?`,
         )
-        .first<SessionJoinRow>(id);
+        .bind(id)
+        .first<SessionJoinRow>();
       if (!row) return null;
 
       const expiresAt = new Date(row.expires_at).getTime();
       if (expiresAt <= nowMs) {
-        await db.prepare('DELETE FROM sessions WHERE id = ?').run(id);
+        await db.prepare('DELETE FROM sessions WHERE id = ?').bind(id).run();
         return null;
       }
       if (expiresAt - nowMs < ttlMs / 2) {
         const newExpiry = new Date(nowMs + ttlMs).toISOString();
-        await db.prepare('UPDATE sessions SET expires_at = ? WHERE id = ?').run(newExpiry, id);
+        await db
+          .prepare('UPDATE sessions SET expires_at = ? WHERE id = ?')
+          .bind(newExpiry, id)
+          .run();
         row.expires_at = newExpiry;
       }
       return {
@@ -88,14 +93,18 @@ export function createSessionRepository(
     },
 
     async delete(rawToken: string): Promise<void> {
-      await db.prepare('DELETE FROM sessions WHERE id = ?').run(await tokenHash(rawToken));
+      await db
+        .prepare('DELETE FROM sessions WHERE id = ?')
+        .bind(await tokenHash(rawToken))
+        .run();
     },
 
     /** Removes all expired sessions (cron-friendly, also fine to call opportunistically). */
     async purgeExpired(): Promise<void> {
       await db
         .prepare('DELETE FROM sessions WHERE expires_at <= ?')
-        .run(new Date(now()).toISOString());
+        .bind(new Date(now()).toISOString())
+        .run();
     },
   };
 }

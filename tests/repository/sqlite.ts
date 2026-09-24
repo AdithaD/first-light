@@ -23,21 +23,20 @@ export function createTestDatabase(): Database {
   const wrap = (sql: string): DbStatement => {
     const stmt = sqlite.prepare(sql);
     let bound: Params = [];
-    const exec = (args: Params): Params => (args.length > 0 ? args : bound);
     return {
       bind(...values) {
         bound = values;
         return this;
       },
-      async first<T>(...args: Params): Promise<T | null> {
-        const row = stmt.get(...exec(args)) as T | undefined;
+      async first<T>(): Promise<T | null> {
+        const row = stmt.get(...bound) as T | undefined;
         return row ?? null;
       },
-      async all<T>(...args: Params): Promise<{ results: T[] }> {
-        return { results: stmt.all(...exec(args)) as T[] };
+      async all<T>(): Promise<{ results: T[] }> {
+        return { results: stmt.all(...bound) as T[] };
       },
-      async run(...args: Params): Promise<unknown> {
-        return stmt.run(...exec(args));
+      async run(): Promise<unknown> {
+        return stmt.run(...bound);
       },
     };
   };

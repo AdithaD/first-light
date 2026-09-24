@@ -9,13 +9,9 @@
  */
 export interface DbStatement {
   bind(...values: (string | number | bigint | null)[]): DbStatement;
-  first<T = Record<string, unknown>>(
-    ...values: (string | number | bigint | null)[]
-  ): Promise<T | null>;
-  all<T = Record<string, unknown>>(
-    ...values: (string | number | bigint | null)[]
-  ): Promise<{ results: T[] }>;
-  run(...values: (string | number | bigint | null)[]): Promise<unknown>;
+  first<T = Record<string, unknown>>(): Promise<T | null>;
+  all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
+  run(): Promise<unknown>;
 }
 
 export interface Database {

@@ -66,12 +66,15 @@ export function createUserRepository(db: Database) {
     },
 
     async getUserByEmail(email: string): Promise<User | null> {
-      const row = await db.prepare('SELECT * FROM users WHERE email = ?').first<UserRow>(email);
+      const row = await db
+        .prepare('SELECT * FROM users WHERE email = ?')
+        .bind(email)
+        .first<UserRow>();
       return row ? toUser(row) : null;
     },
 
     async getUserById(id: string): Promise<User | null> {
-      const row = await db.prepare('SELECT * FROM users WHERE id = ?').first<UserRow>(id);
+      const row = await db.prepare('SELECT * FROM users WHERE id = ?').bind(id).first<UserRow>();
       return row ? toUser(row) : null;
     },
 
@@ -83,7 +86,8 @@ export function createUserRepository(db: Database) {
 					 JOIN oauth_accounts o ON o.user_id = u.id
 					 WHERE o.provider = ? AND o.provider_account_id = ?`,
         )
-        .first<UserRow>(provider, providerAccountId);
+        .bind(provider, providerAccountId)
+        .first<UserRow>();
       return row ? toUser(row) : null;
     },
 
@@ -100,15 +104,35 @@ export function createUserRepository(db: Database) {
         .prepare(
           'INSERT INTO oauth_accounts (provider, provider_account_id, user_id, created_at) VALUES (?, ?, ?, ?)',
         )
-        .run(provider, providerAccountId, userId, new Date().toISOString());
+        .bind(provider, providerAccountId, userId, new Date().toISOString())
+        .run();
     },
 
     /** Does this email already have a password credential? (Coexistence routing, ADR-0005.) */
     async hasPasswordCredential(userId: string): Promise<boolean> {
       const row = await db
         .prepare('SELECT user_id FROM password_credentials WHERE user_id = ?')
-        .first(userId);
+        .bind(userId)
+        .first();
       return row !== null;
+    },
+
+    /** Raw stored PBKDF2 hash (auth layer verifies; never leaves the server). */
+    async getPasswordHash(userId: string): Promise<string | null> {
+      const row = await db
+        .prepare('SELECT password_hash FROM password_credentials WHERE user_id = ?')
+        .bind(userId)
+        .first<{ password_hash: string }>();
+      return row?.password_hash ?? null;
+    },
+
+    async updatePasswordHash(userId: string, passwordHash: string): Promise<void> {
+      await db
+        .prepare(
+          'UPDATE password_credentials SET password_hash = ?, updated_at = ? WHERE user_id = ?',
+        )
+        .bind(passwordHash, new Date().toISOString(), userId)
+        .run();
     },
   };
 }
