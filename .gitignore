@@ -25,3 +25,6 @@ test-results/
 # Logs & OS noise
 *.log
 .DS_Store
+
+# Local handoff/report documents
+/local-reports/

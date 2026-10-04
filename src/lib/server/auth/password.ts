@@ -45,6 +45,7 @@ async function deriveBits(
   return new Uint8Array(bits);
 }
 
+/** Create a salted PBKDF2-SHA256 digest using the configured (MVP-default) work factor. */
 export async function hashPassword(
   password: string,
   opts: PasswordHashOptions = {},
@@ -55,6 +56,7 @@ export async function hashPassword(
   return `pbkdf2$sha256$${iterations}$${b64url(salt)}$${b64url(hash)}`;
 }
 
+/** Verify a stored PBKDF2 digest using constant-time byte comparison after format checks. */
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const parts = stored.split('$');
   if (parts.length !== 5 || parts[0] !== 'pbkdf2' || parts[1] !== 'sha256') return false;

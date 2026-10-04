@@ -6,6 +6,8 @@ import { getRequestEvent } from '$app/server';
 import { drizzle } from 'drizzle-orm/d1';
 import { hashPassword, verifyPassword, type PasswordHashOptions } from './password';
 import { authSchema } from './schema';
+
+/** Adapt the app's PBKDF2 implementation to Better Auth's password callback contract. */
 export function createPbkdf2PasswordCallbacks(options: PasswordHashOptions = {}) {
   return {
     hash: (password: string) => hashPassword(password, options),
@@ -14,6 +16,7 @@ export function createPbkdf2PasswordCallbacks(options: PasswordHashOptions = {})
   };
 }
 
+/** Build a request-scoped Better Auth instance backed by the supplied D1 database. */
 export function createBetterAuth(db: Parameters<typeof drizzle>[0]) {
   const clientId = privateEnv.GOOGLE_CLIENT_ID;
   const clientSecret = privateEnv.GOOGLE_CLIENT_SECRET;

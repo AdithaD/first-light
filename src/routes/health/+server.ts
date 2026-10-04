@@ -6,4 +6,5 @@ import type { RequestHandler } from './$types';
 
 // Uptime-probe target (Phase 7). APP_VERSION is set as a Worker var at deploy;
 // falls back to 'dev' locally.
+/** Return a small liveness payload without probing external providers or D1. */
 export const GET: RequestHandler = () => json(healthPayload(env.APP_VERSION ?? 'dev'));

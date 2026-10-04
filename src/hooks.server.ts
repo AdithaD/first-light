@@ -4,6 +4,7 @@ import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { createBetterAuth } from '$lib/server/auth/better-auth';
 import { getDb } from '$lib/server/repository/db';
 
+/** Attach request-scoped D1/auth state and hydrate locals from the current session. */
 export const handle: Handle = async ({ event, resolve }) => {
   event.locals.db = getDb(event.platform);
   event.locals.auth = event.locals.db
@@ -11,6 +12,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     : null;
 
   if (event.locals.auth) {
+    // Resolve identity once here so protected routes can share the verified session.
     const current = await event.locals.auth.api.getSession({ headers: event.request.headers });
     event.locals.user = current?.user ?? null;
     event.locals.session = current?.session ?? null;

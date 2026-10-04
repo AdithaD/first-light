@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
+/** Start Google OAuth through Better Auth while preserving the current request cookie and origin. */
 export const GET: RequestHandler = async ({ locals, request, url }) => {
   if (!locals.auth) error(503, 'Google sign-in is not configured yet.');
   const authRequest = new Request(new URL('/api/auth/sign-in/social', url.origin), {

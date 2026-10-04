@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/private';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+/** Supply only public OAuth availability and a generic callback message to the login form. */
 export const load: PageServerLoad = ({ url }) => ({
   googleConfigured: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
   oauthMessage: url.searchParams.get('error')
@@ -10,6 +11,7 @@ export const load: PageServerLoad = ({ url }) => ({
 });
 
 export const actions: Actions = {
+  /** Sign in through Better Auth and keep credential failures indistinguishable to the user. */
   default: async ({ request, locals }) => {
     const data = await request.formData();
     const email = String(data.get('email') ?? '');

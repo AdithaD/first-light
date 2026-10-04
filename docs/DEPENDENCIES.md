@@ -24,20 +24,21 @@ Runtime integration policy: external providers use plain `fetch` / WebCrypto whe
 
 ## Runtime integrations
 
-| Integration                 | Mechanism                                                                | Status                       |
-| --------------------------- | ------------------------------------------------------------------------ | ---------------------------- |
-| Better Auth                 | OAuth/sessions and email/password endpoints; PBKDF2 via custom callbacks | authorised (ADR-0005)        |
-| Workers AI (Summariser)     | OpenAI-compatible REST via plain `fetch`                                 | authorised (ADR-0003)        |
-| Resend (Mailer)             | REST via plain `fetch`                                                   | authorised (ADR-0004)        |
-| Open-Meteo / Guardian / ABC | HTTP/RSS via plain `fetch`                                               | authorised (DATA_SOURCES.md) |
+| Integration               | Mechanism                                                                | Status                       |
+| ------------------------- | ------------------------------------------------------------------------ | ---------------------------- |
+| Better Auth               | OAuth/sessions and email/password endpoints; PBKDF2 via custom callbacks | authorised (ADR-0005)        |
+| Workers AI (Summariser)   | OpenAI-compatible REST via plain `fetch`                                 | authorised (ADR-0003)        |
+| Resend (Mailer)           | REST via plain `fetch`                                                   | authorised (ADR-0004)        |
+| Open-Meteo / ABC News RSS | HTTP/RSS via plain `fetch`                                               | authorised (DATA_SOURCES.md) |
 
 ## Additional packages authorised for Phase 2 auth (owner approval 2026-09-24)
 
-| Package              | Purpose                                                                         | Status     | Authorisation notes                                                   |
-| -------------------- | ------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------- |
-| `better-auth@1.5.0`  | Google OAuth, OAuth account records, session lifecycle, custom PBKDF2 callbacks | authorised | Owner approval; ADR-0005 hybrid amendment; v1.5.0 D1 fixture verified |
-| `drizzle-orm@0.45.1` | Official Drizzle D1 driver (`drizzle-orm/d1`) and Drizzle schema runtime        | authorised | Owner approval; runtime dependency                                    |
-| `drizzle-kit@0.31.9` | Schema SQL generation and local migration authoring                             | authorised | Owner approval; dev-only; remote migration remains gated              |
+| Package              | Purpose                                                                         | Status     | Authorisation notes                                                        |
+| -------------------- | ------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------- |
+| `better-auth@1.5.0`  | Google OAuth, OAuth account records, session lifecycle, custom PBKDF2 callbacks | authorised | Owner approval; ADR-0005 hybrid amendment; v1.5.0 D1 fixture verified      |
+| `drizzle-orm@0.45.1` | Official Drizzle D1 driver (`drizzle-orm/d1`) and Drizzle schema runtime        | authorised | Owner approval; runtime dependency                                         |
+| `drizzle-kit@0.31.9` | Schema SQL generation and local migration authoring                             | authorised | Owner approval; dev-only; remote migration remains gated                   |
+| `htmlparser2@12.0.0` | XML-mode parsing of approved ABC RSS feeds and extraction of feed item metadata | authorised | Owner approval 2026-09-25; MIT; pure JS; RSS parsing + category extraction |
 
 ## Proposed (not authorised — do not install)
 

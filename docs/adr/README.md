@@ -11,6 +11,7 @@ recorded as a new/amended ADR **before** code changes.
 | [ADR-0003](ADR-0003-ai-provider.md)        | AI provider: Summariser interface over Workers AI     | Accepted           |
 | [ADR-0004](ADR-0004-email-delivery.md)     | Email delivery via Resend                             | Accepted           |
 | [ADR-0005](ADR-0005-authentication.md)     | Better Auth + Drizzle D1; retained PBKDF2 credentials | Accepted (amended) |
+| [ADR-0006](ADR-0006-digest-preferences.md) | MVP daily digest preferences and content              | Accepted           |
 
 ## Template
 

@@ -22,6 +22,7 @@ export function isoNow(): string {
   return new Date().toISOString();
 }
 
+/** Extract the adapter-provided D1 binding without coupling this layer to Workers types. */
 export function getDb(platform: unknown): Database | null {
   // Structural access: the real platform is `App.Platform` whose `env` shape
   // is provided by the adapter; we intentionally don't depend on its types.

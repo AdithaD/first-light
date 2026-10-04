@@ -3,6 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 
 import type { Actions, PageServerLoad } from './$types';
 
+/** Report whether Google sign-in is available without exposing provider credentials. */
 export const load: PageServerLoad = ({ url }) => ({
   googleConfigured: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
   oauthMessage: url.searchParams.get('error')
@@ -11,6 +12,7 @@ export const load: PageServerLoad = ({ url }) => ({
 });
 
 export const actions: Actions = {
+  /** Validate the minimal signup fields, then let Better Auth create the account and session. */
   default: async ({ request, locals }) => {
     const data = await request.formData();
     const email = String(data.get('email') ?? '');
